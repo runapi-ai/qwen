@@ -1,6 +1,6 @@
 {
   "name": "qwen",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "RunAPI Qwen API skill for Claude Code, Codex, Gemini CLI, Cursor, and 50+ agents",
   "skills": [
     {

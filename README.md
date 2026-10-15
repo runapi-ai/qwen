@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Configure OpenAI-compatible clients to use Qwen text models on RunAPI.
+  Configure OpenAI-compatible clients to use Qwen models on RunAPI.
 </p>
 
 <p align="center">
@@ -21,11 +21,11 @@
 </div>
 <br/>
 
-Call Qwen text models through RunAPI with the official OpenAI SDK or any
-OpenAI-compatible client. Point clients at `https://runapi.ai/v1`, send
-`qwen3-next-80b-a3b-instruct`, and pay through one RunAPI balance. This skill
-teaches Claude Code, Codex, Gemini CLI, Cursor, and 50+ agents how to wire Qwen
-text requests through RunAPI.
+Call the Qwen API through RunAPI with the official OpenAI SDK or any
+OpenAI-compatible client. Point clients at `https://runapi.ai/v1`, send a Qwen
+model ID such as `qwen3.6-27b` or `qwen3-coder-next`, and pay through one
+RunAPI balance. This skill teaches Claude Code, Codex, Gemini CLI, Cursor, and
+50+ agents how to wire Qwen requests through RunAPI.
 
 The canonical agent file is `skills/qwen/SKILL.md`.
 
@@ -59,7 +59,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="qwen3-next-80b-a3b-instruct",
+    model="qwen3.6-27b",
     messages=[{"role": "user", "content": "Hello, Qwen!"}],
 )
 print(response.choices[0].message.content)
@@ -73,20 +73,39 @@ const client = new OpenAI({
   baseURL: "https://runapi.ai/v1",
 });
 
-const response = await client.chat.completions.create({
-  model: "qwen3-next-80b-a3b-instruct",
-  messages: [{ role: "user", content: "Hello, Qwen!" }],
+const stream = await client.chat.completions.create({
+  model: "qwen3-coder-next",
+  messages: [{ role: "user", content: "Write a binary search in Go." }],
+  stream: true,
+  stream_options: { include_usage: true },
 });
-console.log(response.choices[0].message.content);
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? "");
+}
 ```
 
 Get a RunAPI API Key at <https://runapi.ai/api_keys>.
 
-## Supported Qwen text models
+## Supported Qwen models
 
 | Model ID | Notes |
 |---|---|
-| `qwen3-next-80b-a3b-instruct` | Qwen text chat and instruction-following workloads |
+| `qwen3.6-27b` | Dense agentic coding and reasoning; image input on Chat Completions |
+| `qwen3.6-35b-a3b` | Efficient MoE coding and reasoning; image input on Chat Completions |
+| `qwen3.5-397b-a17b` | Largest Qwen3.5 open-weight model; image input on Chat Completions |
+| `qwen3.5-122b-a10b` | Qwen3.5 MoE for text and image reasoning |
+| `qwen3.5-27b` | Dense Qwen3.5 text and image workloads |
+| `qwen3.5-35b-a3b` | Low-cost Qwen3.5 MoE workloads |
+| `qwen3-coder-next` | Text-only coding agents and repository work |
+| `qwen3-vl-235b-a22b-thinking` | Image reasoning with always-on thinking |
+| `qwen3-vl-235b-a22b-instruct` | Image understanding and OCR without thinking |
+
+## Capability boundary
+
+Chat Completions carries text, streaming, function tools, and image input for
+the Qwen3.6, Qwen3.5, and Qwen3-VL models. OpenAI Responses, Anthropic Messages,
+and Gemini contents accept text requests and reject image input. Thinking models
+return their reasoning in `reasoning_content` next to the final `content`.
 
 ## Routing
 
@@ -101,7 +120,6 @@ Get a RunAPI API Key at <https://runapi.ai/api_keys>.
   commits or shell history.
 - Stream long responses (`stream: true`) so the agent can release the
   terminal/IO loop early.
-- This skill is for Qwen text models. Use the Qwen 2 skill for image generation.
 - For pricing, rate-limit, and commercial-usage answers, link to
   <https://runapi.ai/models/qwen> rather than this README.
 
